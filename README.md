@@ -1,5 +1,7 @@
 # Operating System
 
+[Last note](notes/26.Threads-Intro.md)
+
 The goal of this repo is to get a summary of the OS courses
 
 In this repository you will find different folders link to Operating Systems course.
@@ -7,6 +9,9 @@ In this repository you will find different folders link to Operating Systems cou
 - [Courses](cours) that are on [Moodle](https://pedago-ece.campusonline.me/course/view.php?id=5695)
 - [Notes](notes) of the courses
 - [Labs](labs) (please **not share** due to plagiat) but you can take a look ;)
+
+## Contribute
+If you see mistakes you are welcome to make some changes and push them on the remote repository. Look [Pratical Links](#practical-links) for markdown syntax.
 
 ## Install
 Go in the folder of your choice (**../myfolder/**)
@@ -21,8 +26,6 @@ Or
 # ssh
 git clone git@github.com:polocto/Operating-System.git
 ```
-## Contribute
-If you see mistakes you are welcome to make some changes and push them on the remote repository. Look [Pratical Links](#practical-links)
 
 ## Practical Links
 
