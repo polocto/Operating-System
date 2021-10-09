@@ -1,6 +1,6 @@
 # Operating System
 
-[Last note](notes/26.Threads-Intro.md)
+[Last note](notes/31.Semaphores.md)
 
 The goal of this repo is to get a summary of the OS courses
 
