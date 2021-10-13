@@ -80,8 +80,10 @@ int main()
     printf("%lf usec\n", (end.tms_utime+end.tms_stime-start.tms_utime-start.tms_stime)*1000000.0/sysconf(_SC_CLK_TCK));
     
     printf("%ld usec\n", (rend.ru_utime.tv_sec-rstart.ru_utime.tv_sec)*1000000 +(rend.ru_utime.tv_usec-rstart.ru_utime.tv_usec)+(rend.ru_stime.tv_sec-rstart.ru_stime.tv_sec)*1000000 +(rend.ru_stime.tv_usec-rstart.ru_stime.tv_usec));
-    printf("%d\n", resultat);
-
+    printf("Volonter context switch : %ld-%ld=%ld\n", rend.ru_nvcsw, rstart.ru_nvcsw, rend.ru_nvcsw - rstart.ru_nvcsw);
+    printf("Involonter context switch : %ld-%ld=%ld\n", rend.ru_nivcsw, rstart.ru_nivcsw, rend.ru_nivcsw - rstart.ru_nivcsw);
+    printf("In : %ld\n",rend.ru_inblock - rstart.ru_inblock);
+    printf("Out : %ld\n",rend.ru_oublock - rstart.ru_oublock);
      return 0;
 }
 
