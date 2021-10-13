@@ -16,6 +16,7 @@ typedef struct
     int result;
 }Somme;
 
+clock_t times(struct tms *buf); 
 
 void *somme( void *ptr );
 
