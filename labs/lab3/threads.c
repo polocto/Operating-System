@@ -6,7 +6,7 @@
 #include <sys/resource.h>
 #include <unistd.h>
 
-#define REPEAT 10000
+#define REPEAT 1000
 
 typedef struct 
 {
@@ -22,25 +22,25 @@ void *somme( void *ptr );
 
 int main()
 {
-     pthread_t thread1, thread2, thread3;
-     Somme a,b,c;
      struct tms start, end;
     struct rusage rstart, rend;
-    int i;
+    int i, resultat;
 
 
-     a.a = 2;
-     b.a = 6;
-     c.a = 1;
-     a.b = 3;
-     b.b = 2;
-     c.b = 10;
-     int  iret1, iret2, iret3;
 
     times(&start);
     getrusage(RUSAGE_SELF, &rstart);
     /////////////////////////////////
     for(i = 0; i< REPEAT; i++){
+        pthread_t thread1, thread2, thread3;
+        Somme a,b,c;
+        a.a = 2;
+        b.a = 6;
+        c.a = 1;
+        a.b = 3;
+        b.b = 2;
+        c.b = 10;
+        int  iret1, iret2, iret3;
         /* Create independent threads each of which will execute function */
 
         iret1 = pthread_create( &thread1, NULL, somme, (void*) &a);
@@ -58,7 +58,7 @@ int main()
         }
 
         iret3 = pthread_create( &thread3, NULL, somme, (void*) &c);
-        if(iret2)
+        if(iret3)
         {
             fprintf(stderr,"Error - pthread_create() return code: %d\n",iret2);
             exit(EXIT_FAILURE);
@@ -71,6 +71,7 @@ int main()
         pthread_join( thread1, NULL);
         pthread_join( thread2, NULL);
         pthread_join( thread3, NULL);
+        resultat = a.result * b.result * c.result;
     }
     ////////////////////////////////////
     times(&end);
@@ -79,7 +80,7 @@ int main()
     printf("%lf usec\n", (end.tms_utime+end.tms_stime-start.tms_utime-start.tms_stime)*1000000.0/sysconf(_SC_CLK_TCK));
     
     printf("%ld usec\n", (rend.ru_utime.tv_sec-rstart.ru_utime.tv_sec)*1000000 +(rend.ru_utime.tv_usec-rstart.ru_utime.tv_usec)+(rend.ru_stime.tv_sec-rstart.ru_stime.tv_sec)*1000000 +(rend.ru_stime.tv_usec-rstart.ru_stime.tv_usec));
-    printf("%d\n", a.result * b.result * c.result);
+    printf("%d\n", resultat);
 
      return 0;
 }

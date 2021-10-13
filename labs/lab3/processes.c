@@ -28,7 +28,7 @@ int main(int argc, char **argv)
 
     times(&start);
     getrusage(RUSAGE_SELF, &rstart);
-    for (i = 0; i < 10; i++)
+    for (i = 0; i < 1000; i++)
     {
 
         int id1, id2, id3, idFlag1, idFlag2, idFlag3;
@@ -102,6 +102,12 @@ int main(int argc, char **argv)
             // printf("*ptr1 : %d\n", *ptr1);
             int Total = (*ptr1) - (*ptr2) / (*ptr3) + result;
             // printf("%d - %d / %d + %d = %d\n", *ptr1, *ptr2, *ptr3, result, Total); //display results
+            shmdt(ptr1);
+            shmdt(ptr2);
+            shmdt(ptr3);
+            shmdt(flag1);
+            shmdt(flag2);
+            shmdt(flag3);
             shmctl(id2, IPC_RMID, NULL); // mark ptr to be destroy from the share memory
             shmctl(id1, IPC_RMID, NULL); // mark ptr to be destroy from the share memory
             shmctl(id3, IPC_RMID, NULL);
