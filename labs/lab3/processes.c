@@ -28,9 +28,8 @@ int main(int argc, char **argv)
 
     times(&start);
     getrusage(RUSAGE_SELF, &rstart);
-    for (i = 0; i < 10000; i++)
+    for (i = 0; i < 10; i++)
     {
-        /* code */
 
         int id1, id2, id3, idFlag1, idFlag2, idFlag3;
         int i = 0;
@@ -70,6 +69,7 @@ int main(int argc, char **argv)
                     int a = 25, b = 2;
                     *ptr1 = a + b;
                     *flag1 = 1;
+                    exit(0);
                 }
                 else
                 {
@@ -77,6 +77,7 @@ int main(int argc, char **argv)
                     int c = 3, d = 7;
                     *ptr2 = c * d;
                     *flag2 = 1;
+                    exit(0);
                 }
             }
             else
@@ -85,6 +86,7 @@ int main(int argc, char **argv)
                 int f = 10;
                 *ptr3 = e - f;
                 *flag3 = 1;
+                exit(0);
             }
         }
         else
