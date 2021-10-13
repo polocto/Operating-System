@@ -6,7 +6,7 @@
 #include <sys/resource.h>
 #include <unistd.h>
 
-#define REPEAT 1000
+#define REPEAT 10000
 
 typedef struct 
 {

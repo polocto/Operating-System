@@ -28,7 +28,7 @@ int main(int argc, char **argv)
 
     times(&start);
     getrusage(RUSAGE_SELF, &rstart);
-    for (i = 0; i < 1000; i++)
+    for (i = 0; i < 10000; i++)
     {
 
         int id1, id2, id3, idFlag1, idFlag2, idFlag3;
@@ -108,6 +108,7 @@ int main(int argc, char **argv)
             shmdt(flag1);
             shmdt(flag2);
             shmdt(flag3);
+            
             shmctl(id2, IPC_RMID, NULL); // mark ptr to be destroy from the share memory
             shmctl(id1, IPC_RMID, NULL); // mark ptr to be destroy from the share memory
             shmctl(id3, IPC_RMID, NULL);
