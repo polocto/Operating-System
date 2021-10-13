@@ -99,9 +99,9 @@ int main(int argc, char **argv)
             // printf("a : %d , b : %d\n",a,b);
             // printf("*ptr1 : %d\n", *ptr1);
             int Total = (*ptr1) - (*ptr2) / (*ptr3) + result;
-            printf("%d - %d / %d + %d = %d\n", *ptr1, *ptr2, *ptr3, result, Total); //display results
-            shmctl(id2, IPC_RMID, NULL);                                            // mark ptr to be destroy from the share memory
-            shmctl(id1, IPC_RMID, NULL);                                            // mark ptr to be destroy from the share memory
+            // printf("%d - %d / %d + %d = %d\n", *ptr1, *ptr2, *ptr3, result, Total); //display results
+            shmctl(id2, IPC_RMID, NULL); // mark ptr to be destroy from the share memory
+            shmctl(id1, IPC_RMID, NULL); // mark ptr to be destroy from the share memory
             shmctl(id3, IPC_RMID, NULL);
             shmctl(idFlag2, IPC_RMID, NULL); // mark ptr to be destroy from the share memory
             shmctl(idFlag1, IPC_RMID, NULL); // mark ptr to be destroy from the share memory
