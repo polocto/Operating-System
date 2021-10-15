@@ -21,10 +21,17 @@ clock_t times(struct tms *buf);
 #define PERMS 0660
 #define REPEAT 100
 
-int soustraction(int a, int b);
-int somme(int a, int b);
-int division(int a, int b);
-int multiplication(int a, int b);
+typedef struct 
+{
+    /* data */
+    int a;
+    int b;
+}Somme;
+
+int soustraction(Somme calcul);
+int somme(Somme calcul);
+int division(Somme calcul);
+int multiplication(Somme calcul);
 
 int main(int argc, char **argv)
 {
@@ -66,41 +73,38 @@ int main(int argc, char **argv)
         *flag1 = 0;
         *flag2 = 0;
         *flag3 = 0;
-
+        Somme a,b,c,d;
+        a.a = 2;    a.b = 3; // Somme => 5
+        b.a = 6;    b.b = 2; // Multiplication => 12
+        c.a = 1;    c.b = 10; // Soustraction => -9
+        d.a = 21;   d.b = 12; // Somme => 33
         if (fork() == 0)
         {
             if (fork() == 0)
             {
                 if (fork() == 0)
                 {
-                    int a = 2, b = 3;
-                    *ptr1 = a + b; // => 5
+                    *ptr1 = somme(a);
                     *flag1 = 1;
                     exit(0);
                 }
                 else
                 {
-
-                    int c = 6, d = 2;
-                    *ptr2 = c * d; // => 12
+                    *ptr2 = multiplication(b);
                     *flag2 = 1;
                     exit(0);
                 }
             }
             else
             {
-                int e = 1;
-                int f = 10;
-                *ptr3 = e - f; // => -9
+                *ptr3 = soustraction(c);
                 *flag3 = 1;
                 exit(0);
             }
         }
         else
         {
-            int g = 21;
-            int h = 12;
-            int result = g + h; // => 33
+            int result = somme(d);
 
             while (*flag1 == 0 || *flag2 == 0 || *flag3 == 0)
                 wait(NULL);
@@ -144,22 +148,22 @@ int main(int argc, char **argv)
 }
 
 
-int somme(int a, int b)
+int somme(Somme calcul)
 {
-    return a+b;
+    return calcul.a + calcul.b;
 }
 
-int soustraction(int a, int b)
+int soustraction(Somme calcul)
 {
-    return a-b;
+    return calcul.a - calcul.b;
 }
 
-int multiplication(int a, int b)
+int multiplication(Somme calcul)
 {
-    return a*b;
+    return calcul.a * calcul.b;
 }
 
-int division(int a, int b)
+int division(Somme calcul)
 {
-    return a/b;
+    return calcul.a / calcul.b;
 }
