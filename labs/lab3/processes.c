@@ -19,7 +19,7 @@ clock_t times(struct tms *buf);
 #define KEY5 4571
 #define KEY6 4572
 #define PERMS 0660
-#define REPEAT 100
+#define REPEAT 1000
 
 typedef struct 
 {
