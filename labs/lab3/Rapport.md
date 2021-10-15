@@ -66,7 +66,7 @@ In processes if we use only the `while()` and no `wait()` we will obtain **no vo
 #include <sys/resource.h>
 #include <unistd.h>
 
-#define REPEAT 100
+#define REPEAT 1000
 
 typedef struct 
 {
@@ -209,7 +209,7 @@ clock_t times(struct tms *buf);
 #define KEY5 4571
 #define KEY6 4572
 #define PERMS 0660
-#define REPEAT 100
+#define REPEAT 1000
 
 typedef struct 
 {
