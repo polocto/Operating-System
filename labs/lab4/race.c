@@ -1,68 +1,50 @@
 #include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-#include <sys/types.h>
-
+#include <unistd.h>
 #include <pthread.h>
-#include <sys/shm.h>
-#include <sys/wait.h>
-#include <unistd.h>
-#include <sys/times.h>
-#include <sys/resource.h>
-#include <stdio.h>
-#include <unistd.h>
 
-#define KEY 4567
-#define PERMS 0660
+#define REPEAT 10
 
-void increment(int *number);
-void decrement(int *number);
-
-// int main()
-// {
-//     int i;
-
-//     *i = 65;
-//     iret1 = pthread_create( &thread1, NULL, increment, i);
-//     iret2 = pthread_create( &thread2, NULL, increment, i);
-
-// pthread_join( thread1, NULL);
-// pthread_join( thread1, NULL);
-
-//     return 0;
-// }
+void* increment(void *number);
+void* decrement(void *number);
 
 int main()
 {
-    printf("oh\n");
-    int id, *i = NULL;
-    id = shmget(KEY, sizeof(int), IPC_CREAT | PERMS); //create share memory space
-    i = (int *)shmat(id, NULL, 0);
-    for (int j = 0; j < 1000000; j++)
-    {
-        *i = 65;
-        if (fork() == 0)
-        {
-            increment(i);
-            exit(0);
-        }
-        else
-        {
-            decrement(i);
-            wait(NULL);
-        }
-        if (*i != 65)
-            printf("%d\n", *i);
+    int i;
+
+    pthread_t thread1, thread2;
+
+    for(int j = 0; j<REPEAT; j++){
+        i = 65;
+        pthread_create( &thread1, NULL, increment, (void*)&i);
+        pthread_create( &thread2, NULL, decrement, (void*)&i);
+
+        pthread_join( thread1, NULL);
+        pthread_join( thread2, NULL);
+        printf("%d\n\n\n",i);
     }
     return 0;
 }
 
-void increment(int *number)
+void* increment(void *number)
 {
-    (*number)++;
+    int reg =*((int*)number);
+    printf("I1\n");
+    reg++;
+    printf("I2\n");
+    sleep(1);
+    printf("I3\n");
+    *((int*)number) = reg;
+    printf("I4\n");
 }
 
-void decrement(int *number)
+void* decrement(void *number)
 {
-    (*number)--;
+    int reg =*((int*)number);
+    printf("D1\n");
+    reg--;
+    printf("D2\n");
+    sleep(1);
+    printf("D3\n");
+    *((int*)number) = reg;
+    printf("D4\n");
 }
