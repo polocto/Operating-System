@@ -1,64 +1,63 @@
 #include <stdio.h>
 #include <stdlib.h>
-#include <string.h>
-#include <sys/types.h>
-
+#include <unistd.h>
 #include <pthread.h>
-#include <sys/shm.h>
-#include <sys/wait.h>
-#include <unistd.h>
-#include <sys/times.h>
-#include <sys/resource.h>
-#include <stdio.h>
-#include <unistd.h>
 
-#define KEY 4567
-#define PERMS 0660
+#define REPEAT 1000000
 
-void increment(int *number);
-void decrement(int *number);
+void* somme(void *arg);
+void* multiplication(void *arg);
 
-// int main()
-// {
-//     int i;
+typedef struct {
+    int a;
+    int b;
+    int result;
+}Equation;
 
-//     *i = 65;
-//     iret1 = pthread_create( &thread1, NULL, increment, i);
-//     iret2 = pthread_create( &thread2, NULL, increment, i);
-
-        // pthread_join( thread1, NULL);
-        // pthread_join( thread1, NULL);
-
-//     return 0;
-// }
+void init(Equation* arg){
+    arg->a = 5;
+    arg->b = 6;
+}
 
 int main()
 {
-    int id, *i = NULL;
-    id = shmget(KEY, sizeof(int), IPC_CREAT | PERMS); //create share memory space
-    i = (int *)shmat(id, NULL, 0);
+    pthread_t thread1, thread2, thread3, thread4;
+    Equation calc1, calc2, calc3, result;
 
-    *i = 65;
-    if(fork()==0)
-    {
-        increment(i);
-    }
-    else
-    {
-        decrement(i);
-    }
+    init(&calc1);
+    init(&calc2);
+    init(&calc3);
 
+    pthread_create( &thread1, NULL, somme, (void*)&calc1);
+    pthread_create( &thread2, NULL, somme, (void*)&calc2);
+    pthread_create( &thread3, NULL, somme, (void*)&calc3);
+    pthread_join( thread1, NULL);
+    pthread_join( thread2, NULL);
+    result.a = calc1.result;
+    result.b = calc2.result;
+    
+    pthread_create( &thread4, NULL, multiplication, &result);
+    pthread_join( thread3, NULL);
+    pthread_join( thread4, NULL);
+    result.a = calc3.result;
+    result.b = result.result;
+    
+    pthread_create( &thread4, NULL, multiplication, &result);
+    pthread_join( thread4, NULL);
+
+    printf("%d\n", result.result);
 
     return 0;
 }
 
-
-void increment(int *number)
+void* somme(void *arg)
 {
-    (*number)++;
+    Equation* reg = (Equation*)arg;
+    reg->result = reg->a + reg->b;
 }
 
-void decrement(int *number)
+void* multiplication(void *arg)
 {
-    (*number)--;
+    Equation* reg = (Equation*)arg;
+    reg->result = reg->a * reg->b;
 }
