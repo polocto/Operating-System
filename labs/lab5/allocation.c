@@ -73,13 +73,33 @@ hole_t* allocHole(address_t p, int sz, hole_t* prev, hole_t* next)
 address_t myAlloc(mem_t *mp, int sz)
 {
     address_t m_allocate_space;
-    hole_t* m_hole = mp->root;
+    hole_t* m_hole = mp->root, *temp=NULL;
 
-///Select which hole can match data
-    while (m_hole != NULL && m_hole->sz < sz)
+///Select which hole can match data First Fit
+    // while (m_hole != NULL && m_hole->sz < sz)
+    // {
+    //     m_hole = m_hole->next;
+    // }
+///Select which hole can match data Best Fit
+    while (m_hole != NULL)
     {
+        if(!temp || abs(m_hole->sz-sz) < abs(temp->sz-sz) )
+        {
+            temp = m_hole;
+        }
         m_hole = m_hole->next;
     }
+    m_hole = temp;
+///Select which hole can match data Worst Fit
+    // while (m_hole != NULL)
+    // {
+    //     if(!temp || abs(m_hole->sz-sz) > abs(temp->sz-sz) )
+    //     {
+    //         temp = m_hole;
+    //     }
+    //     m_hole = m_hole->next;
+    // }
+    // m_hole = temp;
 //If none exit failure data
     if(!m_hole)
     {
