@@ -70,18 +70,20 @@ hole_t* allocHole(address_t p, int sz, hole_t* prev, hole_t* next)
     return new;
 }
 
-address_t myAlloc(mem_t *mp, int sz)
-{
-    address_t m_allocate_space;
-    hole_t* m_hole = mp->root, *temp=NULL;
 
-///Select which hole can match data First Fit
-    // while (m_hole != NULL && m_hole->sz < sz)
-    // {
-    //     m_hole = m_hole->next;
-    // }
-    
-///Select which hole can match data Best Fit
+hole_t* firstFit(hole_t* m_hole, int sz)
+{
+    while (m_hole != NULL && m_hole->sz < sz)
+    {
+        m_hole = m_hole->next;
+    }
+
+    return m_hole;
+}
+
+hole_t* bestFit(hole_t* m_hole, int sz)
+{
+    hole_t* temp=NULL;
     while (m_hole != NULL)
     {
         if(!temp || abs(m_hole->sz-sz) < abs(temp->sz-sz) )
@@ -92,16 +94,38 @@ address_t myAlloc(mem_t *mp, int sz)
     }
     m_hole = temp;
 
+    return m_hole;
+}
+
+hole_t* worstFit(hole_t* m_hole, int sz)
+{
+    hole_t* temp=NULL;
+    while (m_hole != NULL)
+    {
+        if(!temp || abs(m_hole->sz-sz) > abs(temp->sz-sz) )
+        {
+            temp = m_hole;
+        }
+        m_hole = m_hole->next;
+    }
+    m_hole = temp;
+
+    return m_hole;
+}
+
+address_t myAlloc(mem_t *mp, int sz)
+{
+    address_t m_allocate_space;
+    hole_t* m_hole = mp->root;
+
+///Select which hole can match data First Fit
+    m_hole = firstFit(m_hole,sz);
+
+///Select which hole can match data Best Fit
+    //m_hole = bestFit(m_hole, sz);
+
 ///Select which hole can match data Worst Fit
-    // while (m_hole != NULL)
-    // {
-    //     if(!temp || abs(m_hole->sz-sz) > abs(temp->sz-sz) )
-    //     {
-    //         temp = m_hole;
-    //     }
-    //     m_hole = m_hole->next;
-    // }
-    // m_hole = temp;
+    //m_hole = worstFit(m_hole, sz);
 
 //If none exit failure data
     if(!m_hole)
