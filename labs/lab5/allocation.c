@@ -80,6 +80,7 @@ address_t myAlloc(mem_t *mp, int sz)
     // {
     //     m_hole = m_hole->next;
     // }
+    
 ///Select which hole can match data Best Fit
     while (m_hole != NULL)
     {
@@ -90,6 +91,7 @@ address_t myAlloc(mem_t *mp, int sz)
         m_hole = m_hole->next;
     }
     m_hole = temp;
+
 ///Select which hole can match data Worst Fit
     // while (m_hole != NULL)
     // {
@@ -100,6 +102,7 @@ address_t myAlloc(mem_t *mp, int sz)
     //     m_hole = m_hole->next;
     // }
     // m_hole = temp;
+
 //If none exit failure data
     if(!m_hole)
     {
@@ -115,30 +118,23 @@ address_t myAlloc(mem_t *mp, int sz)
 //Managing holes
     if(m_hole->sz == sz)//Same size -> suppress hole
     {
-        if(prev != NULL && next!=NULL)//If previous make the link with the next one
+        if(prev != NULL) //if there is a previous
         {
             prev->next = next;
-            next->prev = prev;
-        }
-        else if(prev != NULL) //if there is no next
-        {
-            prev->next = next;
-        }
-        else if(next!=NULL)//If there is no previous associate the next to the root
-        {
-            next->prev = prev;
-            mp->root = next;
-            free((void*)m_hole); //delete dynamic memory
         }
         else
         {
-            mp->root = NULL;
-            free((void*)m_hole); //delete dynamic memory
+            mp->root = next;
         }
+        if(next!=NULL)//If there is a next
+        {
+            next->prev = prev;
+        }
+            free((void*)m_hole); //delete dynamic memory
     }
     else //reducing hole size
     {
-        m_hole->adr = m_allocate_space + sz;
+        m_hole->adr += sz;
         m_hole->sz -= sz;
     }
     //printf("Address : %d / Size : %d\nHole Address : %d/ Size : %d\n\n",m_allocate_space, sz, mp->root->adr, mp->root->sz );
@@ -198,12 +194,12 @@ void myFree(mem_t *mp, address_t p, int sz)
 // assign a value to a byte
 void myWrite(mem_t *mp, address_t p, byte_t val)
 {
-    mp->mem[p] = val;
+    *(mp->mem+p) = val;
 }
 
 
 // read memory from a byte
 byte_t myRead(mem_t *mp, address_t p)
 {
-    return mp->mem[p];
+    return *(mp->mem+p);
 }
