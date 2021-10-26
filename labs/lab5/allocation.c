@@ -118,13 +118,8 @@ address_t myAlloc(mem_t *mp, int sz)
     address_t m_allocate_space;
     hole_t* m_hole = mp->root;
 
-///Select which hole can match data First Fit
     m_hole = firstFit(m_hole,sz);
-
-///Select which hole can match data Best Fit
     //m_hole = bestFit(m_hole, sz);
-
-///Select which hole can match data Worst Fit
     //m_hole = worstFit(m_hole, sz);
 
 //If none exit failure data
@@ -154,7 +149,7 @@ address_t myAlloc(mem_t *mp, int sz)
         {
             next->prev = prev;
         }
-            free((void*)m_hole); //delete dynamic memory
+        free((void*)m_hole); //delete dynamic memory
     }
     else //reducing hole size
     {
