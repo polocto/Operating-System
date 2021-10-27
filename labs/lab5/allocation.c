@@ -6,7 +6,7 @@
 int main() {
     mem_t *mem = initMem();
 
-    address_t adr1 = myAlloc(mem, 5);
+    address_t adr1 = myAlloc(mem, 5); //
     address_t adr2 = myAlloc(mem, 10);
     address_t adr3 = myAlloc(mem, 100);
 
@@ -27,21 +27,20 @@ int main() {
 
 
 //Exercise
-
+//initialization of virtual memory
 mem_t *initMem()
 {
-    mem_t* virtualMemory = (mem_t*)malloc(sizeof(mem_t));
+    //creating virtual memory
+    mem_t* virtualMemory = (mem_t*)malloc(sizeof(mem_t)); 
 
-    for(address_t i =0;i<SIZE;i++)
-    {
-        virtualMemory->mem[i]=0;
-    }
+//------Initialization of free space indication
+    virtualMemory->root = (hole_t*)malloc(sizeof(hole_t)); 
 
-    virtualMemory->root = (hole_t*)malloc(sizeof(hole_t));
-
-    virtualMemory->root->adr = 0;
+    virtualMemory->root->adr = 0; // Adresse of the begining of free spaces
+    // Only one big hole at the begining
     virtualMemory->root->next = NULL;
     virtualMemory->root->prev = NULL;
+    // SIZE free spaces
     virtualMemory->root->sz = SIZE;
 
     return virtualMemory;
@@ -86,7 +85,7 @@ hole_t* bestFit(hole_t* m_hole, int sz)
     hole_t* temp=NULL;
     while (m_hole != NULL)
     {
-        if(!temp || abs(m_hole->sz-sz) < abs(temp->sz-sz) )
+        if((!temp || abs(m_hole->sz-sz) < abs(temp->sz-sz)) && m_hole->sz>=sz)
         {
             temp = m_hole;
         }
@@ -102,7 +101,7 @@ hole_t* worstFit(hole_t* m_hole, int sz)
     hole_t* temp=NULL;
     while (m_hole != NULL)
     {
-        if(!temp || abs(m_hole->sz-sz) > abs(temp->sz-sz) )
+        if((!temp || abs(m_hole->sz-sz) > abs(temp->sz-sz)) && m_hole->sz>=sz)
         {
             temp = m_hole;
         }
@@ -213,7 +212,7 @@ void myFree(mem_t *mp, address_t p, int sz)
 // assign a value to a byte
 void myWrite(mem_t *mp, address_t p, byte_t val)
 {
-    *(mp->mem+p) = val;
+    *(mp->mem+p) = val; //mp->mem[p] = val;
 }
 
 
