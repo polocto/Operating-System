@@ -6,17 +6,17 @@
 int main() {
     mem_t *mem = initMem();
 
-    address_t adr1 = myAlloc(mem, 5); //
+    address_t adr1 = myAlloc(mem, 5); //allocate 5 byte into address 1
     address_t adr2 = myAlloc(mem, 10);
     address_t adr3 = myAlloc(mem, 100);
 
-    myFree(mem, adr2, 10);
+    myFree(mem, adr2, 10); // free address 2 à the 9 following adresses
     myFree(mem, adr1, 5);
 
     myWrite(mem, adr3, 543);  // write on the 1st byte
     myWrite(mem, adr3+9, 34); // write on the 10th byte
 
-    byte_t  val1 = myRead(mem, adr3);
+    byte_t  val1 = myRead(mem, adr3); // read value on address 3
     byte_t val2 = myRead(mem, adr3+9);
 
     printf("Val1 : %d\n", val1);
@@ -69,7 +69,7 @@ hole_t* allocHole(address_t p, int sz, hole_t* prev, hole_t* next)
     return new;
 }
 
-
+// first big enough hole
 hole_t* firstFit(hole_t* m_hole, int sz)
 {
     while (m_hole != NULL && m_hole->sz < sz)
@@ -79,7 +79,7 @@ hole_t* firstFit(hole_t* m_hole, int sz)
 
     return m_hole;
 }
-
+// take the hole with the smaller difference with it
 hole_t* bestFit(hole_t* m_hole, int sz)
 {
     hole_t* temp=NULL;
@@ -95,7 +95,7 @@ hole_t* bestFit(hole_t* m_hole, int sz)
 
     return m_hole;
 }
-
+// Should take the bigger space and go in the middle of it
 hole_t* worstFit(hole_t* m_hole, int sz)
 {
     hole_t* temp=NULL;
@@ -116,7 +116,7 @@ address_t myAlloc(mem_t *mp, int sz)
 {
     address_t m_allocate_space;
     hole_t* m_hole = mp->root;
-
+    //Choose the position of the hole
     m_hole = firstFit(m_hole,sz);
     //m_hole = bestFit(m_hole, sz);
     //m_hole = worstFit(m_hole, sz);
@@ -170,13 +170,13 @@ void myFree(mem_t *mp, address_t p, int sz)
         return;
     }
     
-    while( next != NULL && p > next->adr)//while I have a next one and that the previous one is after me
+    while( next != NULL && p > next->adr)//while I have a next hole and that the variable representing the next hole is before me go to the following hole
     {
         prev = next;
         next = next->next;
     }
-    hole_t* actual = allocHole(p,sz,prev,next);
-
+    hole_t* actual = allocHole(p,sz,prev,next);// allocate space for my hole
+// if actual follows the precedent hole then merge precedent in actual
     if(prev && prev->adr + prev->sz == actual->adr)
     {
         prev->sz += actual->sz;
@@ -188,7 +188,7 @@ void myFree(mem_t *mp, address_t p, int sz)
         free(actual);
         actual = prev;
     }
-
+// if next follows the actual hole then merge next in actual
     if(next && actual->adr + actual->sz == next->adr)
     {
         next->sz += actual->sz;
@@ -202,7 +202,7 @@ void myFree(mem_t *mp, address_t p, int sz)
         actual = next;
     }
 
-
+// if actual have no precedent define actual as the root hole
     if(!actual->prev)
     {
         mp->root = actual;
