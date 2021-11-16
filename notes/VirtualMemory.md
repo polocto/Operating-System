@@ -13,7 +13,7 @@ RAM = Physical Memory
 
 `Allocate(nb /*of words*/)`
 
-	#### Algorithm
+#### Algorithm
 
 - find `nb` of available free contiguous words
 - Return the address of the 1st word (slow down the read and write process)
