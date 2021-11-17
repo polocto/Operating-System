@@ -1,7 +1,8 @@
 #include "allocation.h"
 #include <stdlib.h>
 #include <stdio.h>
-
+#define PROCESS_ID 4262
+ram_t ram;
 //It should be possible to use this memory as indicated in the main :
 int main() {
     mem_t *mem = initMem();
@@ -31,10 +32,19 @@ int main() {
 mem_t *initMem()
 {
     //creating virtual memory
-    mem_t* virtualMemory = (mem_t*)malloc(sizeof(mem_t)); 
+    mem_t* virtualMemory = (mem_t*)malloc(sizeof(mem_t));
+
+    for(int i=0; i<NUMBER_FRAME;i++)
+    {
+        ram.free[i]=0;
+    }
 
 //------Initialization of free space indication
     virtualMemory->root = (hole_t*)malloc(sizeof(hole_t)); 
+    for(int i = 0; i< NUMBER_PAGE ; i++)
+    {
+        virtualMemory->page_table[i]=-1;
+    }
 
     virtualMemory->root->adr = 0; // Adresse of the begining of free spaces
     // Only one big hole at the begining
@@ -112,7 +122,7 @@ hole_t* worstFit(hole_t* m_hole, int sz)
     return m_hole;
 }
 
-address_t myAlloc(mem_t *mp, int sz)
+address_t myContAlloc(mem_t *mp, int sz)
 {
     address_t m_allocate_space;
     hole_t* m_hole = mp->root;
@@ -160,14 +170,14 @@ address_t myAlloc(mem_t *mp, int sz)
 }
 
 // release memory that has already been allocated previously
-void myFree(mem_t *mp, address_t p, int sz)
+hole_t* myContFree(mem_t *mp, address_t p, int sz)
 {
     hole_t* next = mp->root, * prev = NULL;
 
     if(!next)
     {
         mp->root = allocHole(p,sz,NULL,NULL);
-        return;
+        return NULL;
     }
     
     while( next != NULL && p > next->adr)//while I have a next hole and that the variable representing the next hole is before me go to the following hole
@@ -207,17 +217,77 @@ void myFree(mem_t *mp, address_t p, int sz)
     {
         mp->root = actual;
     }
+    return actual;
+}
+
+address_t myAlloc(mem_t *mp, int sz){
+    address_t virtual = myContAlloc(mp,sz);
+    int i = virtual / PAGE_SIZE ;
+    int j = (virtual+sz -1) / PAGE_SIZE;
+    
+    
+    for( int page = i; page<=j; page++)
+    {
+        if(mp->page_table[page]<0)
+        {
+            //Demander frame
+            int free_frame = 0;
+            while(ram.free[free_frame]!=0 && free_frame < (NUMBER_FRAME))free_frame ++ ;
+
+            if(free_frame>=(NUMBER_FRAME))
+                exit(EXIT_FAILURE);
+            ram.free[free_frame] = PROCESS_ID;
+            mp->page_table[page]=free_frame; //page nouvelle frame
+        }
+    }
+
+    return virtual;
+}
+void myFree(mem_t *mp, address_t p, int sz){
+    hole_t*actual = myContFree(mp,p,sz);
+    if(!actual)
+        exit(EXIT_FAILURE);
+    address_t begin = actual->adr;
+    address_t end = actual->sz - 1;
+
+    int i = begin / PAGE_SIZE ;
+    int j = end / PAGE_SIZE;
+    
+    
+    for( int page = i+1; page<j; page++)
+    {
+        ram.free[mp->page_table[page]]=0;
+        mp->page_table[page]=-1;
+    }
+
+    if(begin%PAGE_SIZE == 0 && (end%PAGE_SIZE==PAGE_SIZE-1 || j > i ))
+    {
+        ram.free[mp->page_table[i]]=0;
+        mp->page_table[i] = -1;
+    }
+    if(end%PAGE_SIZE==PAGE_SIZE-1 && j > i)
+    {
+        ram.free[mp->page_table[j]]=0;
+        mp->page_table[j]=-1;
+    }
+
 }
 
 // assign a value to a byte
 void myWrite(mem_t *mp, address_t p, byte_t val)
 {
-    *(mp->mem+p) = val; //mp->mem[p] = val;
+    //*(mp->mem+p) = val; //mp->mem[p] = val;
+    address_t page = mp->page_table[p/PAGE_SIZE]* PAGE_SIZE ;
+    address_t offset = p%PAGE_SIZE;
+    ram.RAM[page+offset] = val;
 }
 
 
 // read memory from a byte
 byte_t myRead(mem_t *mp, address_t p)
 {
-    return *(mp->mem+p);
+    //return *(mp->mem+p);
+    address_t page = mp->page_table[p/PAGE_SIZE]* PAGE_SIZE ;
+    address_t offset = p%PAGE_SIZE;
+    return ram.RAM[page+offset];
 }
