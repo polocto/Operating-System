@@ -33,7 +33,7 @@ mem_t *initMem()
 {
     //creating virtual memory
     mem_t* virtualMemory = (mem_t*)malloc(sizeof(mem_t));
-
+//Initializing my frame to free
     for(int i=0; i<NUMBER_FRAME;i++)
     {
         ram.free[i]=0;
@@ -55,7 +55,7 @@ mem_t *initMem()
 
     return virtualMemory;
 }
-
+//Create a new hole
 hole_t* allocHole(address_t p, int sz, hole_t* prev, hole_t* next)
 {
     hole_t* new = NULL;
@@ -177,7 +177,7 @@ hole_t* myContFree(mem_t *mp, address_t p, int sz)
     if(!next)
     {
         mp->root = allocHole(p,sz,NULL,NULL);
-        return NULL;
+        return mp->root;
     }
     
     while( next != NULL && p > next->adr)//while I have a next hole and that the variable representing the next hole is before me go to the following hole
@@ -222,11 +222,11 @@ hole_t* myContFree(mem_t *mp, address_t p, int sz)
 
 address_t myAlloc(mem_t *mp, int sz){
     address_t virtual = myContAlloc(mp,sz);
-    int i = virtual / PAGE_SIZE ;
-    int j = (virtual+sz -1) / PAGE_SIZE;
+    int first_page = virtual / PAGE_SIZE ;
+    int last_page = (virtual+sz -1) / PAGE_SIZE;
     
     
-    for( int page = i; page<=j; page++)
+    for( int page = first_page; page<=last_page; page++)
     {
         if(mp->page_table[page]<0)
         {
@@ -250,25 +250,25 @@ void myFree(mem_t *mp, address_t p, int sz){
     address_t begin = actual->adr;
     address_t end = actual->sz - 1;
 
-    int i = begin / PAGE_SIZE ;
-    int j = end / PAGE_SIZE;
+    int first_page = begin / PAGE_SIZE ;
+    int last_page = end / PAGE_SIZE;
     
     
-    for( int page = i+1; page<j; page++)
+    for( int page = first_page+1; page<last_page; page++)
     {
         ram.free[mp->page_table[page]]=0;
         mp->page_table[page]=-1;
     }
 
-    if(begin%PAGE_SIZE == 0 && (end%PAGE_SIZE==PAGE_SIZE-1 || j > i ))
+    if(begin%PAGE_SIZE == 0 && (end%PAGE_SIZE==PAGE_SIZE-1 || last_page > first_page ))
     {
-        ram.free[mp->page_table[i]]=0;
-        mp->page_table[i] = -1;
+        ram.free[mp->page_table[first_page]]=0;
+        mp->page_table[first_page] = -1;
     }
-    if(end%PAGE_SIZE==PAGE_SIZE-1 && j > i)
+    if(end%PAGE_SIZE==PAGE_SIZE-1 && last_page > first_page)
     {
-        ram.free[mp->page_table[j]]=0;
-        mp->page_table[j]=-1;
+        ram.free[mp->page_table[last_page]]=0;
+        mp->page_table[last_page]=-1;
     }
 
 }
