@@ -248,7 +248,7 @@ void myFree(mem_t *mp, address_t p, int sz){
     if(!actual)
         exit(EXIT_FAILURE);
     address_t begin = actual->adr;
-    address_t end = actual->sz - 1;
+    address_t end = actual->adr + actual->sz - 1;
 
     int first_page = begin / PAGE_SIZE ;
     int last_page = end / PAGE_SIZE;
