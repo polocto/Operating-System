@@ -89,7 +89,7 @@ hole_t* firstFit(hole_t* m_hole, int sz)
 
     return m_hole;
 }
-// take the hole with the smaller difference with it
+// take the hole with the smaller difference with it and big enough
 hole_t* bestFit(hole_t* m_hole, int sz)
 {
     hole_t* temp=NULL;
@@ -105,7 +105,7 @@ hole_t* bestFit(hole_t* m_hole, int sz)
 
     return m_hole;
 }
-// Should take the bigger space and go in the middle of it
+// Take the bigger space
 hole_t* worstFit(hole_t* m_hole, int sz)
 {
     hole_t* temp=NULL;
@@ -222,22 +222,23 @@ hole_t* myContFree(mem_t *mp, address_t p, int sz)
 
 address_t myAlloc(mem_t *mp, int sz){
     address_t virtual = myContAlloc(mp,sz);
-    int first_page = virtual / PAGE_SIZE ;
-    int last_page = (virtual+sz -1) / PAGE_SIZE;
+    //Paging
+    int first_page = virtual / PAGE_SIZE ; //define my first page use by my allocate memory
+    int last_page = (virtual+sz -1) / PAGE_SIZE;//define my last page use by my allocate memory
+    int free_frame = 0; //define it here, help us to not start for each page from the begining
     
     
-    for( int page = first_page; page<=last_page; page++)
+    for( int page = first_page; page<=last_page; page++) //for each page from the first to the last
     {
-        if(mp->page_table[page]<0)
+        if(mp->page_table[page]<0)//if no frame allocated for the page
         {
-            //Demander frame
-            int free_frame = 0;
+            //Ask for frame
             while(ram.free[free_frame]!=0 && free_frame < (NUMBER_FRAME))free_frame ++ ;
-
+            //If No free Frame
             if(free_frame>=(NUMBER_FRAME))
                 exit(EXIT_FAILURE);
-            ram.free[free_frame] = PROCESS_ID;
-            mp->page_table[page]=free_frame; //page nouvelle frame
+            ram.free[free_frame] = PROCESS_ID; //define which process runs on which frame (optional/only idicate it's taken fine)
+            mp->page_table[page]=free_frame; //add new frame to page
         }
     }
 
@@ -245,26 +246,28 @@ address_t myAlloc(mem_t *mp, int sz){
 }
 void myFree(mem_t *mp, address_t p, int sz){
     hole_t*actual = myContFree(mp,p,sz);
-    if(!actual)
+    //Paging
+    if(!actual)//If allocation didn't work
         exit(EXIT_FAILURE);
-    address_t begin = actual->adr;
-    address_t end = begin + actual->sz - 1;
+    address_t begin = actual->adr;//first address of my hole
+    address_t end = begin + actual->sz - 1;//last address of my hole
 
-    int first_page = begin / PAGE_SIZE ;
-    int last_page = end / PAGE_SIZE;
+    int first_page = begin / PAGE_SIZE ;//page where is my first address
+    int last_page = end / PAGE_SIZE;//page where is my last address
     
-    
+    //delete all page between first and la page of my hole excluding my last and first page
     for( int page = first_page+1; page<last_page; page++)
     {
         ram.free[mp->page_table[page]]=0;
         mp->page_table[page]=-1;
     }
-
+    //Suppress first page if hole take it all
     if(begin%PAGE_SIZE == 0 && (end%PAGE_SIZE==PAGE_SIZE-1 || last_page > first_page ))
     {
         ram.free[mp->page_table[first_page]]=0;
         mp->page_table[first_page] = -1;
     }
+    //Suppress last page if hole take it all
     if(end%PAGE_SIZE==PAGE_SIZE-1 && last_page > first_page)
     {
         ram.free[mp->page_table[last_page]]=0;
@@ -276,18 +279,16 @@ void myFree(mem_t *mp, address_t p, int sz){
 // assign a value to a byte
 void myWrite(mem_t *mp, address_t p, byte_t val)
 {
-    //*(mp->mem+p) = val; //mp->mem[p] = val;
-    address_t page = mp->page_table[p/PAGE_SIZE]* PAGE_SIZE ;
+    address_t address_frame = mp->page_table[p/PAGE_SIZE]* PAGE_SIZE ;
     address_t offset = p%PAGE_SIZE;
-    ram.RAM[page+offset] = val;
+    ram.RAM[address_frame+offset] = val;
 }
 
 
 // read memory from a byte
 byte_t myRead(mem_t *mp, address_t p)
 {
-    //return *(mp->mem+p);
-    address_t page = mp->page_table[p/PAGE_SIZE]* PAGE_SIZE ;
+    address_t address_frame = mp->page_table[p/PAGE_SIZE]* PAGE_SIZE ;
     address_t offset = p%PAGE_SIZE;
-    return ram.RAM[page+offset];
+    return ram.RAM[address_frame+offset];
 }

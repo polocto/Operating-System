@@ -18,9 +18,8 @@ typedef struct hole
 } hole_t;
 
 typedef struct {
-    //byte_t mem[SIZE]; // espace pour donnée
     hole_t* root; // holes list
-    int page_table[NUMBER_PAGE];
+    int page_table[NUMBER_PAGE];//pages in process
 } mem_t; // dynamically allocates a mem_t structure and initializes its content
 
 
