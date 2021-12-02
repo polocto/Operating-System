@@ -257,10 +257,12 @@ void myFree(mem_t *mp, address_t p, int sz){
     int last_page = end / PAGE_SIZE;//page where is my last address
     
     //delete all page between first and la page of my hole excluding my last and first page
-    for( int page = first_page+1; page<last_page && mp->page_table[page] != -1; page++)
+    for( int page = first_page+1; page<last_page ; page++)
     {
-        ram.frame[mp->page_table[page]]=0;
-        mp->page_table[page]=-1;
+        if(mp->page_table[page] != -1){
+            ram.frame[mp->page_table[page]]=0;
+            mp->page_table[page]=-1;
+        }
     }
     //Suppress first page if hole take it all
     if(begin%PAGE_SIZE == 0 && (end%PAGE_SIZE==PAGE_SIZE-1 || last_page > first_page ))
@@ -274,7 +276,6 @@ void myFree(mem_t *mp, address_t p, int sz){
         ram.frame[mp->page_table[last_page]]=0;
         mp->page_table[last_page]=-1;
     }
-
 }
 ```
 
