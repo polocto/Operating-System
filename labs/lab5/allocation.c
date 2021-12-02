@@ -36,22 +36,15 @@ mem_t *initMem()
 //Initializing my frame to free
     for(int i=0; i<NUMBER_FRAME;i++)
     {
-        ram.free[i]=0;
+        ram.frame[i]=0;
     }
 
 //------Initialization of free space indication
-    virtualMemory->root = (hole_t*)malloc(sizeof(hole_t)); 
     for(int i = 0; i< NUMBER_PAGE ; i++)
     {
         virtualMemory->page_table[i]=-1;
     }
-
-    virtualMemory->root->adr = 0; // Adresse of the begining of free spaces
-    // Only one big hole at the begining
-    virtualMemory->root->next = NULL;
-    virtualMemory->root->prev = NULL;
-    // SIZE free spaces
-    virtualMemory->root->sz = SIZE;
+    virtualMemory->root = allocHole(0, SIZE, NULL, NULL);
 
     return virtualMemory;
 }
@@ -124,8 +117,9 @@ hole_t* worstFit(hole_t* m_hole, int sz)
 
 address_t myContAlloc(mem_t *mp, int sz)
 {
-    address_t m_allocate_space;
+    address_t address = -1;
     hole_t* m_hole = mp->root;
+    hole_t* prev= NULL, *next= NULL;
     //Choose the position of the hole
     m_hole = firstFit(m_hole,sz);
     //m_hole = bestFit(m_hole, sz);
@@ -137,11 +131,11 @@ address_t myContAlloc(mem_t *mp, int sz)
         printf("Memory ERROR");
         exit(EXIT_FAILURE);
     }
-    hole_t* prev = m_hole->prev;
-    hole_t* next = m_hole->next;
+    prev = m_hole->prev;
+    next = m_hole->next;
 
 //Allocating data
-    m_allocate_space = m_hole->adr;
+    address = m_hole->adr;
 
 //Managing holes
     if(m_hole->sz == sz)//Same size -> suppress hole
@@ -165,8 +159,7 @@ address_t myContAlloc(mem_t *mp, int sz)
         m_hole->adr += sz;
         m_hole->sz -= sz;
     }
-    //printf("Address : %d / Size : %d\nHole Address : %d/ Size : %d\n\n",m_allocate_space, sz, mp->root->adr, mp->root->sz );
-    return m_allocate_space;
+    return address;
 }
 
 // release memory that has already been allocated previously
@@ -174,7 +167,7 @@ hole_t* myContFree(mem_t *mp, address_t p, int sz)
 {
     hole_t* next = mp->root, * prev = NULL;
 
-    if(!next)
+    if(!mp->root)
     {
         mp->root = allocHole(p,sz,NULL,NULL);
         return mp->root;
@@ -233,11 +226,11 @@ address_t myAlloc(mem_t *mp, int sz){
         if(mp->page_table[page]<0)//if no frame allocated for the page
         {
             //Ask for frame
-            while(ram.free[free_frame]!=0 && free_frame < (NUMBER_FRAME))free_frame ++ ;
+            while(ram.frame[free_frame]!=0 && free_frame < (NUMBER_FRAME))free_frame ++ ;
             //If No free Frame
             if(free_frame>=(NUMBER_FRAME))
                 exit(EXIT_FAILURE);
-            ram.free[free_frame] = PROCESS_ID; //define which process runs on which frame (optional/only idicate it's taken fine)
+            ram.frame[free_frame] = PROCESS_ID; //define which process runs on which frame (optional/only idicate it's taken fine)
             mp->page_table[page]=free_frame; //add new frame to page
         }
     }
@@ -256,21 +249,21 @@ void myFree(mem_t *mp, address_t p, int sz){
     int last_page = end / PAGE_SIZE;//page where is my last address
     
     //delete all page between first and la page of my hole excluding my last and first page
-    for( int page = first_page+1; page<last_page; page++)
+    for( int page = first_page+1; page<last_page && mp->page_table[page] != -1; page++)
     {
-        ram.free[mp->page_table[page]]=0;
+        ram.frame[mp->page_table[page]]=0;
         mp->page_table[page]=-1;
     }
     //Suppress first page if hole take it all
     if(begin%PAGE_SIZE == 0 && (end%PAGE_SIZE==PAGE_SIZE-1 || last_page > first_page ))
     {
-        ram.free[mp->page_table[first_page]]=0;
+        ram.frame[mp->page_table[first_page]]=0;
         mp->page_table[first_page] = -1;
     }
     //Suppress last page if hole take it all
     if(end%PAGE_SIZE==PAGE_SIZE-1 && last_page > first_page)
     {
-        ram.free[mp->page_table[last_page]]=0;
+        ram.frame[mp->page_table[last_page]]=0;
         mp->page_table[last_page]=-1;
     }
 
