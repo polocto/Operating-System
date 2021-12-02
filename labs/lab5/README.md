@@ -109,11 +109,6 @@ Look for a hole big enough in order to allocate the needed space. If there is no
 return the corressponding address where memory has been reserved.
 
 ```c
-#define SIZE 65536
-#define PAGE_SIZE 128
-#define NUMBER_FRAME SIZE/PAGE_SIZE
-#define NUMBER_PAGE NUMBER_FRAME
-
 address_t myContAlloc(mem_t *mp, int sz)
 {
     address_t address = -1;
