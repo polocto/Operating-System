@@ -23,6 +23,8 @@ int main() {
     printf("Val1 : %d\n", val1);
     printf("Val2 : %d\n", val2);
 
+    freeMem(mem);
+
 }
 
 
@@ -44,10 +46,24 @@ mem_t *initMem()
     {
         virtualMemory->page_table[i]=-1;
     }
+
+    // Alloc a hole that take all given space of the ram
     virtualMemory->root = allocHole(0, SIZE, NULL, NULL);
 
     return virtualMemory;
 }
+
+// free all alocated memory for a virtual memory
+void freeMem(mem_t *virtualMemory){
+    while(virtualMemory->root != NULL){
+        hole_t* temp = virtualMemory->root;
+        virtualMemory->root = temp->next;
+        free(temp);
+    }
+    free(virtualMemory);
+}
+
+
 //Create a new hole
 hole_t* allocHole(address_t p, int sz, hole_t* prev, hole_t* next)
 {
@@ -75,42 +91,43 @@ hole_t* allocHole(address_t p, int sz, hole_t* prev, hole_t* next)
 // first big enough hole
 hole_t* firstFit(hole_t* m_hole, int sz)
 {
-    while (m_hole != NULL && m_hole->sz < sz)
+    hole_t* firstFit = m_hole;
+    while (firstFit != NULL && firstFit->sz < sz)
     {
-        m_hole = m_hole->next;
+        firstFit = firstFit->next;
     }
 
-    return m_hole;
+    return firstFit;
 }
 // take the hole with the smaller difference with it and big enough
 hole_t* bestFit(hole_t* m_hole, int sz)
 {
-    hole_t* temp=NULL;
+    hole_t* bestFit=NULL;
     while (m_hole != NULL)
     {
-        if((!temp || abs(m_hole->sz-sz) < abs(temp->sz-sz)) && m_hole->sz>=sz)
+        if((!bestFit || abs(m_hole->sz-sz) < abs(bestFit->sz-sz)) && m_hole->sz>=sz)
         {
-            temp = m_hole;
+            bestFit = m_hole;
         }
         m_hole = m_hole->next;
     }
-    m_hole = temp;
 
-    return m_hole;
+    return bestFit;
 }
-// Take the bigger space
+
+// Take the biggest empty space
 hole_t* worstFit(hole_t* m_hole, int sz)
 {
-    hole_t* temp=NULL;
+    hole_t* worstFit=NULL;
     while (m_hole != NULL)
     {
-        if((!temp || abs(m_hole->sz-sz) > abs(temp->sz-sz)) && m_hole->sz>=sz)
+        if((!worstFit || abs(m_hole->sz-sz) > abs(worstFit->sz-sz)) && m_hole->sz>=sz)
         {
-            temp = m_hole;
+            worstFit = m_hole;
         }
         m_hole = m_hole->next;
     }
-    m_hole = temp;
+    m_hole = worstFit;
 
     return m_hole;
 }
@@ -118,27 +135,27 @@ hole_t* worstFit(hole_t* m_hole, int sz)
 address_t myContAlloc(mem_t *mp, int sz)
 {
     address_t address = -1;
-    hole_t* m_hole = mp->root;
+    hole_t* fit = NULL;
     hole_t* prev= NULL, *next= NULL;
     //Choose the position of the hole
-    m_hole = firstFit(m_hole,sz);
-    //m_hole = bestFit(m_hole, sz);
-    //m_hole = worstFit(m_hole, sz);
+    //fit = firstFit(mp->root,sz);
+    fit = bestFit(mp->root, sz);
+    //fit = worstFit(mp->root, sz);
 
 //If none exit failure data
-    if(!m_hole)
+    if(!fit)
     {
         printf("Memory ERROR");
         exit(EXIT_FAILURE);
     }
-    prev = m_hole->prev;
-    next = m_hole->next;
+    prev = fit->prev;
+    next = fit->next;
 
 //Allocating data
-    address = m_hole->adr;
+    address = fit->adr;
 
 //Managing holes
-    if(m_hole->sz == sz)//Same size -> suppress hole
+    if(fit->sz == sz)//Same size -> suppress hole
     {
         if(prev != NULL) //if there is a previous
         {
@@ -152,12 +169,12 @@ address_t myContAlloc(mem_t *mp, int sz)
         {
             next->prev = prev;
         }
-        free((void*)m_hole); //delete dynamic memory
+        free((void*)fit); //delete dynamic memory
     }
     else //reducing hole size
     {
-        m_hole->adr += sz;
-        m_hole->sz -= sz;
+        fit->adr += sz;
+        fit->sz -= sz;
     }
     return address;
 }
